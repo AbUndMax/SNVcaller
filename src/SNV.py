@@ -1,3 +1,5 @@
+import scipy.stats as stats
+
 class SNV:
 
     def __init__(self, chrom, pos, ref, depth, bases, qualities):
@@ -20,9 +22,6 @@ class SNV:
         }
 
     def info(self):
-        if self.infoDic is None:
-            return "NO SNV DETECTED"
-
         return ";".join(f"{key}={value}" for key, value in self.infoDic.items())
 
     def detect_snv(self, min_depth, min_alt_count, min_alt_frequency, min_base_quality):
@@ -45,9 +44,10 @@ class SNV:
 
         q = 0
         b = 0
-        while q != len(self.qualities):
+        while q != len(self.qualities) and b != len(self.bases):
             quality = self.qualities[q]
             base = self.bases[b]
+            base_in_upper = base.upper()
 
             # skip base if it is marking new read
             if base == '^':
@@ -61,20 +61,26 @@ class SNV:
 
                 if base in '+-':
                     size_of_indel = self.bases[b + 1]
-                    base = alt = self.bases.upper()[b: b + 2 + int(size_of_indel)]
+                    base = self.bases[b: b + 2 + int(size_of_indel)]
+                    base_in_upper = base.upper()
                     # set the next index for the base (since we have to skip the indel "information" in the bases string)
                     b = b + 1 + int(size_of_indel)
 
-                    if alt in alternatives:
-                        alternatives[alt].count += 1
-                        alternatives[alt].quality_sum += phred
+                    if base_in_upper in alternatives:
+                        alternatives[base_in_upper].count += 1
+                        alternatives[base_in_upper].quality_sum += phred
                     else:
-                        alternatives[alt] = Alt(alt, 1)
-                        alternatives[alt].quality_sum = phred
+                        alternatives[base_in_upper] = Alt(base_in_upper, 1, phred)
 
-                elif base.upper() in 'ACTGNactgn' and base.upper() != self.ref:
-                    alternatives[base.upper()].count += 1
-                    alternatives[base.upper()].quality_sum += phred
+                elif base_in_upper in 'ACTGN' and base_in_upper != self.ref:
+                    alternatives[base_in_upper].count += 1
+                    alternatives[base_in_upper].quality_sum += phred
+
+                if base.isupper():
+                    alternatives[base_in_upper].forward_counter += 1
+                elif base.islower():
+                    alternatives[base_in_upper].reverse_counter += 1
+
 
                 bases_above_threshold.append(base)
                 qualities_above_threshold.append(quality)
@@ -89,8 +95,10 @@ class SNV:
 
         # calculate alternative base and alternative allele count
         highest_count = 0
+        most_abundant_alt = None
         for alt in alternatives.values():
             if alt.count > highest_count:
+                most_abundant_alt = alt
                 highest_count = self.alt_count = alt.count
                 self.qual = alt.quality_sum
 
@@ -102,12 +110,26 @@ class SNV:
                 else:
                     self.alt = alt.name
 
+        # if there is no alternative allele, return False
+        if most_abundant_alt is None:
+            return False
 
         # calculate alternative allele frequency
         self.alt_allel_frequency = self.alt_count / self.depth
 
+        # calculate strand bias
+        ref_rev = self.bases.count(',')
+        ref_fwd = self.bases.count('.')
+        alt_rev = most_abundant_alt.reverse_counter
+        alt_fwd = most_abundant_alt.forward_counter
+
+        print(f"ref_fwd: {ref_fwd}, ref_rev: {ref_rev}, alt_fwd: {alt_fwd}, alt_rev: {alt_rev}")
+
+        _, pvalue = stats.fisher_exact([[ref_fwd, ref_rev], [alt_fwd, alt_rev]])
+
         self.infoDic['DP'] = self.depth
         self.infoDic['AF'] = self.alt_allel_frequency
+        self.infoDic['SB'] = pvalue
 
         # since base quality, depth and altternative allele count are already checked, we only need to check for allele frequency
         return (self.alt_allel_frequency >= min_alt_frequency
@@ -117,9 +139,14 @@ class SNV:
     def __calculate_phred(self, char):
         return ord(char) - 33
 
+    def calculate_strand_bias(self):
+        stats.fisher_exact([[self.ref_forward, self.ref_reverse], [self.alt_forward, self.alt_reverse]])
+
 class Alt:
 
     def __init__(self, name="None", count=0, quality_sum=0):
         self.name = name
         self.count = count
         self.quality_sum = quality_sum
+        self.reverse_counter = 0
+        self.forward_counter = 0
