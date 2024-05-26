@@ -4,6 +4,7 @@ import SNV
 import datetime
 from typing import List
 
+
 class VCFwriter:
 
     chrom_space = 10
@@ -34,7 +35,7 @@ class VCFwriter:
                 file.write("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n")
                 header = ("#CHROM".ljust(self.chrom_space) + "POS".ljust(self.pos_space) + "ID".ljust(self.id_space) +
                 "REF".ljust(self.ref_space) + "ALT".ljust(self.alt_space) + "QUAL".ljust(self.qual_space) +
-                "FILTER".ljust(self.filter_space) + "INFO".ljust(self.info_space) + "FORMAT".ljust(self.format_space) +
+                "FILTER".ljust(self.filter_space) + "INFO".ljust(self.info_space) + "\tFORMAT".ljust(self.format_space) +
                 "SAMPLE".ljust(self.sample_space) + "\n")
                 file.write(header)
         except:
@@ -45,7 +46,7 @@ class VCFwriter:
         return (snv.chrom.ljust(self.chrom_space) + str(snv.pos).ljust(self.pos_space) + ".".ljust(self.id_space) +
                 snv.ref.ljust(self.ref_space) + snv.alt.ljust(self.alt_space) + str(snv.qual).ljust(self.qual_space) +
                 snv.filter.ljust(self.filter_space) + snv.info().ljust(self.info_space) +
-                "GT".ljust(self.format_space) + snv.genotype() + "\n")
+                "\tGT".ljust(self.format_space) + snv.genotype() + "\n")
 
     def write_all_entries(self, snv_list: List[SNV]):
         try:
