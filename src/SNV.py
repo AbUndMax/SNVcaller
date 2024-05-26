@@ -139,9 +139,6 @@ class SNV:
     def __calculate_phred(self, char):
         return ord(char) - 33
 
-    def calculate_strand_bias(self):
-        stats.fisher_exact([[self.ref_forward, self.ref_reverse], [self.alt_forward, self.alt_reverse]])
-
 class Alt:
 
     def __init__(self, name="None", count=0, quality_sum=0):
