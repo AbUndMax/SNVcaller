@@ -30,7 +30,7 @@ def main():
     parser.add_argument("-maf", "--min_alt_freq", type=float, default=0.2, help="Minimum alternative frequency to call a variant")
     args = parser.parse_args()
 
-    print(">>> Variant Caller running...\n")
+    print("\n>>> Variant Caller running...\n")
     print(">>> set parameters: ")
     print("> minimum depth set:", args.min_depth)
     print("> minimum base quality set:", args.min_base_qual)
@@ -38,7 +38,24 @@ def main():
     print("> minimum alternative frequency set:", args.min_alt_freq, "\n")
 
     found_snv = parse_pileup_file(args)
-    print(">>> Found SNV's: ", len(found_snv), "\n")
+    number_of_snv = 0
+    number_of_insertions = 0
+    number_of_deletions = 0
+
+    for snv in found_snv:
+        if len(snv.ref) > 1:
+            number_of_deletions += 1
+        elif len(snv.alt) > 1:
+            number_of_insertions += 1
+        else:
+            number_of_snv += 1
+
+    print(">>> Found SNV's: \t", len(found_snv))
+    if number_of_insertions > 0:
+        print(">>> Found Insertions: \t", number_of_insertions)
+    if number_of_deletions > 0:
+        print(">>> Found Deletions: \t", number_of_deletions)
+    print()
 
     vcf_writer = VCFwriter(args)
     vcf_writer.write_all_entries(found_snv)
