@@ -20,7 +20,6 @@ class VCFwriter:
                 file.write(f"##thresholds: min_depth={args.min_depth}, min_base_qual={args.min_base_qual}, min_alt_count={args.min_alt_count}, min_alt_freq={args.min_alt_freq}\n")
                 file.write("##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total Depth\">\n")
                 file.write("##INFO=<ID=AF,Number=1,Type=Float,Description=\"Allele Frequency\">\n")
-                file.write("##INFO=<ID=SB,Number=1,Type=Float,Description=\"Strand Bias\">\n")
                 header = "{:<6}\t{:<10}\t{:<3}\t{:<3}\t{:<3}\t{:<4}\t{:<6}\t{}\t{}\t{}\n".format(
                     "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT", "SAMPLE"
                 )
