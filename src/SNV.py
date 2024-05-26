@@ -13,16 +13,26 @@ class SNV:
         # these fields will be filled by detect_snv method
         self.alt = None
         self.alt_count = 0
-        self.alt_allel_frequency = 0.0
+        self.alt_allele_frequency = 0.0
         self.qual = 0
         self.filter = None
-        self.infoDic = {
-            'DP': 0,
-            'AF': 0.0
-        }
+        self.infoDic = {}
 
     def info(self):
+        if not self.infoDic:
+            return "."
         return ";".join(f"{key}={value}" for key, value in self.infoDic.items())
+
+    def genotype(self):
+        if self.alt_count == 0:
+            return "0/0"  # no variant detected
+        elif 0.3 <= self.alt_allele_frequency <= 0.7:
+            return "0/1"  # heterozygous
+        elif self.alt_allele_frequency > 0.9:
+            return "1/1"  # homozygous
+        else:
+            return "unsure"
+
 
     def detect_snv(self, min_depth, min_alt_count, min_alt_frequency, min_base_quality):
 
@@ -115,7 +125,7 @@ class SNV:
             return False
 
         # calculate alternative allele frequency
-        self.alt_allel_frequency = self.alt_count / self.depth
+        self.alt_allele_frequency = self.alt_count / self.depth
 
         # calculate strand bias
         ref_rev = self.bases.count(',')
@@ -123,16 +133,14 @@ class SNV:
         alt_rev = most_abundant_alt.reverse_counter
         alt_fwd = most_abundant_alt.forward_counter
 
-        print(f"ref_fwd: {ref_fwd}, ref_rev: {ref_rev}, alt_fwd: {alt_fwd}, alt_rev: {alt_rev}")
-
         _, pvalue = stats.fisher_exact([[ref_fwd, ref_rev], [alt_fwd, alt_rev]])
 
         self.infoDic['DP'] = self.depth
-        self.infoDic['AF'] = self.alt_allel_frequency
+        self.infoDic['AF'] = self.alt_allele_frequency
         self.infoDic['SB'] = pvalue
 
         # since base quality, depth and altternative allele count are already checked, we only need to check for allele frequency
-        return (self.alt_allel_frequency >= min_alt_frequency
+        return (self.alt_allele_frequency >= min_alt_frequency
                 and self.alt_count > min_alt_count
                 and self.depth > min_depth)
 

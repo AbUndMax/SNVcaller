@@ -1,11 +1,21 @@
 import sys
 import traceback
-
 import SNV
 import datetime
 from typing import List
 
 class VCFwriter:
+
+    chrom_space = 10
+    pos_space = 15
+    id_space = 5
+    ref_space = 5
+    alt_space = 5
+    qual_space = 6
+    filter_space = 10
+    info_space = 70
+    format_space = 10
+    sample_space = 0
 
     def __init__(self, args):
         self.filename = f"{args.output_folder}/output.vcf"
@@ -20,17 +30,22 @@ class VCFwriter:
                 file.write(f"##thresholds: min_depth={args.min_depth}, min_base_qual={args.min_base_qual}, min_alt_count={args.min_alt_count}, min_alt_freq={args.min_alt_freq}\n")
                 file.write("##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total Depth\">\n")
                 file.write("##INFO=<ID=AF,Number=1,Type=Float,Description=\"Allele Frequency\">\n")
-                file.write("##INFO=<ID=SB,Number=1,Type=Float,Description=\"Strand Bias\">\n")
-                header = "{:<6}\t{:<10}\t{:<3}\t{:<3}\t{:<3}\t{:<4}\t{:<6}\t{}\t{}\t{}\n".format(
-                    "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT", "SAMPLE"
-                )
+                file.write("##INFO=<ID=SB,Number=1,Type=Float,Description=\"Fisher Strand Bias\">\n")
+                file.write("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n")
+                header = ("#CHROM".ljust(self.chrom_space) + "POS".ljust(self.pos_space) + "ID".ljust(self.id_space) +
+                "REF".ljust(self.ref_space) + "ALT".ljust(self.alt_space) + "QUAL".ljust(self.qual_space) +
+                "FILTER".ljust(self.filter_space) + "INFO".ljust(self.info_space) + "FORMAT".ljust(self.format_space) +
+                "SAMPLE".ljust(self.sample_space) + "\n")
                 file.write(header)
         except:
             print("Error writing VCF header")
             sys.exit(1)
 
     def __generate_vcf_entry(self, snv: SNV):
-        return f"{snv.chrom:<{6}}\t{snv.pos:<{10}}\t{'.':<{3}}\t{snv.ref:<{3}}\t{snv.alt:<{3}}\t{snv.qual:<{4}}\t{snv.filter:<{6}}\t{snv.info()}\n"
+        return (snv.chrom.ljust(self.chrom_space) + str(snv.pos).ljust(self.pos_space) + ".".ljust(self.id_space) +
+                snv.ref.ljust(self.ref_space) + snv.alt.ljust(self.alt_space) + str(snv.qual).ljust(self.qual_space) +
+                snv.filter.ljust(self.filter_space) + snv.info().ljust(self.info_space) +
+                "GT".ljust(self.format_space) + snv.genotype() + "\n")
 
     def write_all_entries(self, snv_list: List[SNV]):
         try:
