@@ -1,5 +1,5 @@
 # SNVcaller
-A pipeline for calling SNVs from RNA-seq data
+A batch program for calling filter SNVs from pileup files to Variant Call Format (VCF) files.
 
 ## Running
 start the program by running the following command:
