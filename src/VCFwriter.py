@@ -26,12 +26,14 @@ class VCFwriter:
         try:
             with open (self.filename, 'w') as file:
                 file.write("##fileformat=VCFv4.2\n")
-                file.write("##source=VariantCaller\n")
+                file.write("##source=variant_caller.py by Niklas G.\n")
                 file.write(f"##fileDate={datetime.datetime.now().strftime('%Y%m%d')}\n")
                 file.write(f"##thresholds: min_depth={args.min_depth}, min_base_qual={args.min_base_qual}, min_alt_count={args.min_alt_count}, min_alt_freq={args.min_alt_freq}\n")
                 file.write("##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total Depth\">\n")
                 file.write("##INFO=<ID=AF,Number=1,Type=Float,Description=\"Allele Frequency\">\n")
                 file.write("##INFO=<ID=SB,Number=1,Type=Float,Description=\"Fisher Strand Bias\">\n")
+                file.write("##INFO=<ID=MSC, Number=1, Type=String, Description=\"Annotation of the Most Severe Consequence\">\n")
+                file.write("##INFO=<ID=IMP, Number=1, Type=String, Description=\"Annotation of the Impact Level\">\n")
                 file.write("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n")
                 header = ("#CHROM".ljust(self.chrom_space) + "POS".ljust(self.pos_space) + "ID".ljust(self.id_space) +
                 "REF".ljust(self.ref_space) + "ALT".ljust(self.alt_space) + "QUAL".ljust(self.qual_space) +

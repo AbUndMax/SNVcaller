@@ -151,12 +151,9 @@ class SNV:
 
     def annotate(self):
         annotator = VariantAnnotator.VariantAnnotator()
-        annotation = annotator.annotate_variant(self.chrom, self.pos, self.ref, self.alt)
+        annotation = annotator.annotate_consequence(self.chrom, self.pos, self.ref, self.alt)
 
-        if annotation is None:
-            self.infoDic["Annotation"] = "No annotation found"
-        else:
-            self.infoDic["Annotation"] = annotation
+        self.infoDic.update(annotation)
 
 class Alt:
 

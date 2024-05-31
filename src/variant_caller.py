@@ -64,11 +64,8 @@ def main():
     found_snv, number_of_snv, number_of_insertions, number_of_deletions = parse_pileup_file(args)
 
     print(">>> Found SNV's: \t", len(found_snv))
-    if number_of_insertions > 0:
-        print(">>> Found Insertions: \t", number_of_insertions)
-    if number_of_deletions > 0:
-        print(">>> Found Deletions: \t", number_of_deletions)
-    print()
+    print(">>> Found Insertions: \t", number_of_insertions)
+    print(">>> Found Deletions: \t", number_of_deletions, "\n")
 
     if args.annotate:
         print(">>> start annotating SNV's with Ensembl VEP\n")
