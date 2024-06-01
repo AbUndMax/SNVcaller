@@ -33,12 +33,17 @@ def parse_pileup_file(args):
 
 
 def load(current, total):
-    current_percent = math.floor(math.floor(current / total * 100) / 10.0) * 10
-    bar = "loading: [ "
-    if current_percent == 0:
-        bar = bar + str(current_percent) + "   " * 9 + " ]"
+    current_percent = current / total * 100
+    current_percent_string = "{:.0f}".format(current_percent)
+    current_percent_floor = math.floor(math.floor(current_percent) / 10.0) * 10
+
+    bar = "annotating: [ "
+
+    if current_percent_floor == 0:
+        bar = bar + str(current_percent_string) + " " + " --" * 9 + " ] % finished"
     else:
-        bar = bar + "## " * int((current_percent / 10) - 1) + str(current_percent) + "   " * int((100 - current_percent) / 10) + " ]"
+        bar = bar + "## " * int((current_percent_floor / 10) - 1) + str(current_percent_string)
+
     print(bar, end="\r")
 
 

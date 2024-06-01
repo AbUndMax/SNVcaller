@@ -35,7 +35,6 @@ class SNV:
         else:
             return "unsure"
 
-
     def detect_snv(self, min_depth, min_alt_count, min_alt_frequency, min_base_quality):
 
         # initial depth check if coverage is sufficient
@@ -63,7 +62,7 @@ class SNV:
 
             # skip base if it is marking new read
             if base == '^':
-                # synch the b iterator with the q iterator by skipping the new Read quality after ^
+                # synch the b loop-variable with the q loop-variable by skipping the new Read quality after ^
                 b += 2
                 q += 1
                 continue
@@ -92,7 +91,6 @@ class SNV:
                     alternatives[base_in_upper].forward_counter += 1
                 elif base.islower():
                     alternatives[base_in_upper].reverse_counter += 1
-
 
                 bases_above_threshold.append(base)
                 qualities_above_threshold.append(quality)
@@ -135,11 +133,11 @@ class SNV:
         alt_rev = most_abundant_alt.reverse_counter
         alt_fwd = most_abundant_alt.forward_counter
 
-        _, pvalue = stats.fisher_exact([[ref_fwd, ref_rev], [alt_fwd, alt_rev]])
+        _, p_value = stats.fisher_exact([[ref_fwd, ref_rev], [alt_fwd, alt_rev]])
 
         self.infoDic['DP'] = self.depth
         self.infoDic['AF'] = self.alt_allele_frequency
-        self.infoDic['SB'] = pvalue
+        self.infoDic['SB'] = p_value
 
         # since base quality, depth and altternative allele count are already checked, we only need to check for allele frequency
         return (self.alt_allele_frequency >= min_alt_frequency
@@ -154,6 +152,7 @@ class SNV:
         annotation = annotator.annotate_consequence(self.chrom, self.pos, self.ref, self.alt)
 
         self.infoDic.update(annotation)
+
 
 class Alt:
 

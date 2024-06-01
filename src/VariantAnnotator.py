@@ -58,7 +58,7 @@ class VariantAnnotator:
             consequence, impact = self._parse_consequence_annotation(response)
 
             return {
-                "MSC": consequence,
+                "FC": consequence,
                 "IMP": impact
             }
 

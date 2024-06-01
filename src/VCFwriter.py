@@ -32,7 +32,7 @@ class VCFwriter:
                 file.write("##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total Depth\">\n")
                 file.write("##INFO=<ID=AF,Number=1,Type=Float,Description=\"Allele Frequency\">\n")
                 file.write("##INFO=<ID=SB,Number=1,Type=Float,Description=\"Fisher Strand Bias\">\n")
-                file.write("##INFO=<ID=MSC, Number=1, Type=String, Description=\"Annotation of the Most Severe Consequence\">\n")
+                file.write("##INFO=<ID=FC, Number=1, Type=String, Description=\"Annotation of the Functional Consequence (via VEP)\">\n")
                 file.write("##INFO=<ID=IMP, Number=1, Type=String, Description=\"Annotation of the Impact Level\">\n")
                 file.write("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n")
                 header = ("#CHROM".ljust(self.chrom_space) + "POS".ljust(self.pos_space) + "ID".ljust(self.id_space) +
